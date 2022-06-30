@@ -4,7 +4,7 @@ from django.contrib.auth import authenticate
 from django.core.mail import send_mail
 
 from rest_framework import serializers
-from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework_simplejwt.tokens import RefreshToken, TokenError
 
 from .models import EMAUser, Address
 
@@ -165,3 +165,16 @@ class ResetPasswordSerializer(serializers.ModelSerializer):
         instance.save()
 
         return instance
+
+class LogoutSerializer(serializers.Serializer):
+    refresh = serializers.CharField()
+
+    def validate(self, data):
+        self.token = data['refresh']
+        return data
+
+    def save(self, **kwargs):
+        try:
+            RefreshToken(self.token).blacklist()
+        except TokenError:
+            self.fail('bad_token')

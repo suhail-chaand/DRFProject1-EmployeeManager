@@ -1,5 +1,7 @@
 from django.contrib import admin
-from django.urls import path
+from django.urls import include, path
+
+from rest_framework_swagger.views import get_swagger_view
 
 from rest_framework_simplejwt.views import (TokenObtainPairView, TokenRefreshView, TokenBlacklistView)
 
@@ -22,6 +24,9 @@ urlpatterns = [
 
     path('forgot_password/<int:pk>', views.ForgotPassword.as_view()),
     path('reset_password/<int:pk>',views.ResetPassword.as_view()),
+
+    path('', get_swagger_view(title='Employee Manager API')),
+    path(r'^api-auth/', include('rest_framework.urls', namespace='rest_framework')),
 
     path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),

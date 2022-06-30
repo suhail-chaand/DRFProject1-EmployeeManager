@@ -4,7 +4,7 @@ from rest_framework_simplejwt.tokens import RefreshToken
 
 from .models import Address, EMAUser
 
-from .serializers import (ForgotPasswordSerializer, ResetPasswordSerializer, SuperUserSerializer, 
+from .serializers import (ForgotPasswordSerializer, LogoutSerializer, ResetPasswordSerializer, SuperUserSerializer, 
 ManagerSerializer, 
 EmployeeSerializer,
 EMAUserLoginSerializer, 
@@ -233,15 +233,12 @@ class ResetPassword(generics.UpdateAPIView):
         else: return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class Logout(generics.GenericAPIView):
+    serializer_class = LogoutSerializer
     permission_classes = [permissions.IsAuthenticated]
 
     def post(self, request):
-        try:
-            refresh = request.data.get('refresh')
-            token = RefreshToken(refresh)
-            token.blacklist()
+        serializer = self.serializer_class(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
 
-            return Response({'message':'Logout successful'},status=status.HTTP_205_RESET_CONTENT)
-
-        except Exception as e:
-            return Response({'error':str(e)},status=status.HTTP_400_BAD_REQUEST)
+        return Response({'message': 'Logout successful'}, status=status.HTTP_200_OK)
